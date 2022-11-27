@@ -11,10 +11,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="useCases" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\peikcad.mms.domain\peikcad.mms.domain.csproj" />
     </ItemGroup>
 

@@ -1,4 +1,4 @@
-namespace peikcad.mms.domain
+namespace peikcad.mms.domain.shared.patterns
 {
     public abstract class DomainEntity<TId, TContext>
     {

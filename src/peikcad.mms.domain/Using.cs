@@ -1,0 +1,1 @@
+global using peikcad.mms.domain.shared.patterns;
