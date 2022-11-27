@@ -17,11 +17,11 @@ public sealed class RegisterOverlordCommandHandler : IAsyncCommandHandler<Regist
         var iid = IID.Deserialize(command.IID).OrThrow();
         var name = CompleteName.Deserialize(command.Name).OrThrow();
 
-        return (await (await Result<Overlord>.Return
+        return (await (await Result<Overlord>.ReturnAsync
                     .IfAsync(async () => false == await repository.ExistsByIIDAsync(iid, cancellationToken))
                     .TryAsync(() => repository.AddAsync(
                         Overlord.Register(iid, name, command.BirthDate, repository.CreateNewContext).OrThrow(), cancellationToken))
-                    .Or(() => new EntityDuplicationException())
+                    .OrException<EntityDuplicationException>()
                     .AsAsync())
                 .MapAsync(async o =>
                 {

@@ -2,19 +2,19 @@ namespace peikcad.mms.domain.shared.patterns;
 
 public sealed class ResultBuilder<T>
 {
-    private Func<Task<bool>>? preconditionAsync;
-    private Func<Task<T>>? tryDoAsync;
+    private Func<bool>? precondition;
+    private Func<T>? tryDo;
     private Func<Exception>? fail;
     
-    public ResultBuilder<T> IfAsync(Func<Task<bool>> preconditionAsync)
+    public ResultBuilder<T> If(Func<bool> precondition)
     {
-        this.preconditionAsync = preconditionAsync;
+        this.precondition = precondition;
         return this;
     }
     
-    public ResultBuilder<T> TryAsync(Func<Task<T>> tryDoAsync)
+    public ResultBuilder<T> Try(Func<T> tryDo)
     {
-        this.tryDoAsync = tryDoAsync;
+        this.tryDo = tryDo;
         return this;
     }
 
@@ -24,23 +24,30 @@ public sealed class ResultBuilder<T>
         return this;
     }
 
-    public async Task<Result<T>> AsAsync()
+    public ResultBuilder<T> OrException<TError>(params object[] args)
+        where TError : Exception
     {
-        if (preconditionAsync is null)
-            throw new ArgumentNullException(nameof(preconditionAsync));
+        fail = () => (TError) Activator.CreateInstance(typeof(TError), args)!;
+        return this;
+    }
 
-        if (tryDoAsync is null)
-            throw new ArgumentNullException(nameof(tryDoAsync));
+    public Result<T> As()
+    {
+        if (precondition is null)
+            throw new ArgumentNullException(nameof(precondition));
+
+        if (tryDo is null)
+            throw new ArgumentNullException(nameof(tryDo));
 
         if (fail is null)
             throw new ArgumentNullException(nameof(fail));
 
-        if (!await preconditionAsync())
+        if (!precondition())
             return new(fail());
 
         try
         {
-            return new(await tryDoAsync());
+            return new(tryDo());
         }
         catch (Exception e)
         {
